@@ -84,8 +84,6 @@ const particles=[];
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function lerp(a,b,t){return a+(b-a)*t}function rand(a,b){return Math.random()*(b-a)+a}
 function resize(){const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));canvas.width=Math.floor(innerWidth*dpr);canvas.height=Math.floor(innerHeight*dpr);canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;W=innerWidth;H=innerHeight;groundY=Math.floor(H*.76);person.x=Math.max(90,W*.16);person.y=groundY;person.scale=clamp(W/1600,.72,1.05);dog.scale=0.5;dog.y=groundY;if(!dog.userMoved){dog.x=Math.max(260,W*.73);dog.targetX=dog.x}else{dog.x=clamp(dog.x,110,W-80);dog.targetX=clamp(dog.targetX,110,W-80)}}
 function drawFrame(fr,x,y,s,bob=0){const dw=Math.round(fr.w*s),dh=Math.round(fr.h*s),dx=Math.round(x-dw/2),dy=Math.round(y-dh+bob);ctx.drawImage(sprite,fr.x,fr.y,fr.w,fr.h,dx,dy,dw,dh)}
-function cloud(x,y,z){const p=8*z,blocks=[[1,0,3,1],[4,1,2,1],[0,1,2,1],[0,2,7,2],[1,4,5,1]];ctx.fillStyle='#f9fdff';for(const [bx,by,bw,bh] of blocks)ctx.fillRect(Math.round(x+bx*p),Math.round(y+by*p),Math.ceil(bw*p),Math.ceil(bh*p));ctx.fillStyle='#d8ebff';ctx.fillRect(Math.round(x+p),Math.round(y+4.3*p),Math.ceil(5*p),Math.ceil(.5*p))}
-function drawBackground(dt){
   if (skyImg.complete) {
   ctx.drawImage(skyImg, 0, 0, W, groundY);
 } else {
