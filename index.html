@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>초코 음식 던지기</title>
+<title> 쪼꼬야 밥먹어라</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#79cbff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}canvas{display:block;width:100vw;height:100vh;image-rendering:pixelated;image-rendering:crisp-edges;cursor:pointer;touch-action:none}.hud{position:fixed;top:14px;left:14px;z-index:10;display:flex;gap:10px;flex-wrap:wrap;pointer-events:none}.pill{background:rgba(255,255,255,.88);border:2px solid rgba(255,255,255,.95);border-radius:999px;padding:9px 14px;font-size:14px;font-weight:900;color:#234e24;box-shadow:0 6px 18px rgba(0,0,0,.12)}.tip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:10;background:rgba(255,255,255,.88);border-radius:999px;padding:10px 16px;font-size:14px;font-weight:900;color:#234e24;box-shadow:0 6px 18px rgba(0,0,0,.12);max-width:calc(100vw - 28px);text-align:center;pointer-events:none}
 </style>
 </head>
 <body>
 <div class="hud"><div class="pill">🍅🥒🍠 먹은 개수: <span id="score">0</span></div><div class="pill">🐶 상태: <span id="status">준비 중</span></div></div>
-<div class="tip">화면을 클릭/터치하면 사람이 토마토·오이·고구마를 던지고, 강아지가 먹으러 가요.</div>
+<div class="tip">화면을 클릭/터치해 쪼꼬한테 먹이주기.</div>
 <canvas id="game"></canvas>
 <script>
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),statusEl=document.getElementById('status');ctx.imageSmoothingEnabled=false;
@@ -22,7 +22,7 @@ const F={
 let W=0,H=0,groundY=0,last=0,score=0,ready=false,food=null;const foods=['tomato','cucumber','sweetpotato'];
 const clouds=[{x:80,y:80,size:1.2,speed:13},{x:380,y:130,size:1.5,speed:9},{x:780,y:65,size:1.1,speed:15}];
 const person={x:120,y:0,scale:.9,throwTimer:0};
-const dog={x:700,y:0,targetX:700,scale:1.0,facing:'left',moving:false,speed:185,bob:0,userMoved:false};
+const dog={x:700,y:0,targetX:700,scale:0.5,facing:'left',moving:false,speed:200,bob:0,userMoved:false};
 const particles=[];
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function lerp(a,b,t){return a+(b-a)*t}function rand(a,b){return Math.random()*(b-a)+a}
 function resize(){const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));canvas.width=Math.floor(innerWidth*dpr);canvas.height=Math.floor(innerHeight*dpr);canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;W=innerWidth;H=innerHeight;groundY=Math.floor(H*.76);person.x=Math.max(90,W*.16);person.y=groundY;person.scale=clamp(W/1600,.72,1.05);dog.scale=clamp(W/1800,.82,1.15);dog.y=groundY;if(!dog.userMoved){dog.x=Math.max(260,W*.73);dog.targetX=dog.x}else{dog.x=clamp(dog.x,110,W-80);dog.targetX=clamp(dog.targetX,110,W-80)}}
@@ -33,7 +33,7 @@ function drawFood(type,x,y,scale=1){const p=6*scale;function r(rx,ry,rw,rh,color
 function spawnHearts(x,y){for(let i=0;i<6;i++)particles.push({x,y,vx:rand(-25,25),vy:rand(-70,-35),life:1,size:rand(10,16)})}
 function heart(x,y,size){const s=size/6;ctx.fillStyle='#ff5c93';const b=[[1,0],[2,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[1,3],[2,3],[3,3],[4,3],[5,3],[2,4],[3,4],[4,4],[3,5]];for(const [bx,by]of b)ctx.fillRect(Math.round(x+bx*s),Math.round(y+by*s),Math.ceil(s),Math.ceil(s))}
 function startThrow(x,y){if(!ready||food)return;const tx=clamp(x,150,W-60),ty=clamp(y,groundY-90,groundY-12);food={type:foods[Math.floor(Math.random()*foods.length)],startX:person.x+60,startY:person.y-125,endX:tx,endY:ty,x:person.x+60,y:person.y-125,t:0,duration:.58,landed:false,eaten:false};person.throwTimer=.18;statusEl.textContent='음식 던지는 중'}
-function update(dt){person.throwTimer=Math.max(0,person.throwTimer-dt);dog.bob+=dt*(dog.moving?11:3);if(food&&!food.landed){food.t+=dt/food.duration;const t=Math.min(food.t,1),ease=1-Math.pow(1-t,3),arc=Math.sin(t*Math.PI)*100;food.x=lerp(food.startX,food.endX,ease);food.y=lerp(food.startY,food.endY,ease)-arc;if(t>=1){food.landed=true;dog.targetX=food.endX;dog.facing=dog.targetX<dog.x?'left':'right';dog.moving=true;dog.userMoved=true;statusEl.textContent='강아지가 먹으러 가는 중'}}if(dog.moving){const dx=dog.targetX-dog.x,step=dog.speed*dt;if(Math.abs(dx)<=step){dog.x=dog.targetX;dog.moving=false;if(food&&food.landed&&!food.eaten){food.eaten=true;score++;scoreEl.textContent=score;statusEl.textContent='냠냠!';spawnHearts(dog.x-10,dog.y-110);setTimeout(()=>{food=null;statusEl.textContent='기다리는 중'},260)}}else dog.x+=Math.sign(dx)*step}for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=45*dt;if(p.life<=0)particles.splice(i,1)}}
+function update(dt){person.throwTimer=Math.max(0,person.throwTimer-dt);dog.bob+=dt*(dog.moving?11:3);if(food&&!food.landed){food.t+=dt/food.duration;const t=Math.min(food.t,1),ease=1-Math.pow(1-t,3),arc=Math.sin(t*Math.PI)*100;food.x=lerp(food.startX,food.endX,ease);food.y=lerp(food.startY,food.endY,ease)-arc;if(t>=1){food.landed=true;dog.targetX=food.endX;dog.facing=dog.targetX<dog.x?'left':'right';dog.moving=true;dog.userMoved=true;statusEl.textContent='쪼꼬가 먹으러 달려간다'}}if(dog.moving){const dx=dog.targetX-dog.x,step=dog.speed*dt;if(Math.abs(dx)<=step){dog.x=dog.targetX;dog.moving=false;if(food&&food.landed&&!food.eaten){food.eaten=true;score++;scoreEl.textContent=score;statusEl.textContent='냠냠!';spawnHearts(dog.x-10,dog.y-110);setTimeout(()=>{food=null;statusEl.textContent='기다리는 중'},260)}}else dog.x+=Math.sign(dx)*step}for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=45*dt;if(p.life<=0)particles.splice(i,1)}}
 function render(dt){ctx.clearRect(0,0,W,H);drawBackground(dt);if(!ready)return;drawFrame(person.throwTimer>0?F.humanThrow:F.humanIdle,person.x,person.y,person.scale,0);if(food&&!food.eaten)drawFood(food.type,food.x-18,food.y-16,1.25);let df;if(dog.moving)df=dog.facing==='left'?F.dogLeftMove:F.dogRightMove;else df=dog.facing==='left'?F.dogLeftIdle:F.dogRightIdle;drawFrame(df,dog.x,dog.y,dog.scale,dog.moving?Math.sin(dog.bob)*4:Math.sin(dog.bob)*1.5);for(const p of particles){ctx.save();ctx.globalAlpha=Math.max(0,p.life);heart(p.x,p.y,p.size);ctx.restore()}}
 function loop(ts){if(!last)last=ts;const dt=Math.min(.033,(ts-last)/1000);last=ts;update(dt);render(dt);requestAnimationFrame(loop)}
 canvas.addEventListener('pointerdown',e=>startThrow(e.clientX,e.clientY));canvas.addEventListener('touchstart',e=>{const t=e.touches[0];if(t)startThrow(t.clientX,t.clientY)},{passive:true});window.addEventListener('resize',resize);
