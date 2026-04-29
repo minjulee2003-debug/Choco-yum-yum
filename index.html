@@ -115,8 +115,9 @@ function drawBackground(dt){
   ctx.drawImage(sunImg, W - 170, 30, sunSize, sunSize);
 }
   function cloud(x,y,z){
-  const cloudWidth=130*z;
-  const cloudHeight=90*z;
+  const cloudWidth=120*z;
+  const ratio=cloudImg.naturalHeight/cloudImg.naturalWidth;
+  const cloudHeight=cloudWidth*ratio;
 
   if(cloudImg.complete && cloudImg.naturalWidth>0){
     ctx.drawImage(cloudImg,x,y,cloudWidth,cloudHeight);
